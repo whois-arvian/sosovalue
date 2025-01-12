@@ -153,7 +153,7 @@ function randomEmail(domain) {
     const cleanLastName = lastName.replace(/[^a-zA-Z]/g, '');
 
     const randomNum = Math.floor(Math.random() * 900) + 100;
-    const emailName = `${cleanFirstName.toLowerCase()}${cleanLastName.toLowerCase()}${randomNum}`;
+    const emailName = `${cleanFirstName.toLowerCase()}-AR-${cleanLastName.toLowerCase()}${randomNum}`;
 
     return {
         name: emailName,
