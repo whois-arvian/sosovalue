@@ -186,7 +186,7 @@ async function register(email, password, username) {
 
             const response = await axios.post('https://gw.sosovalue.com/usercenter/email/anno/sendRegisterVerifyCode/V2', data, axiosConfig);
             console.log(chalk.green(`[+] Registration successful for ${email}`));
-            console.log(chalk.green(`[+] Registration successful for ${response.data}`));
+            console.log(chalk.green(`[+] Registration successful for ${JSON.stringify(response.data)}`));
             console.log(chalk.green(`[+] Registration successful for ${response.code}`));
             return response.data;
         } catch (error) {
