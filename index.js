@@ -384,7 +384,7 @@ async function processRegistration(accountIndex, totalAccounts, invite, password
             }
 
             const domains = await getDomains();
-            const username = faker.internet.userName();
+            const username = faker.internet.username();
 
             if (domains.length === 0) {
                 throw new Error('Failed to fetch domains');
