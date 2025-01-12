@@ -39,7 +39,7 @@ function loadProxies() {
                 }
                 return proxy;
             });
-            
+
         if (proxyList.length === 0) {
             throw new Error('No proxies found in proxies.txt');
         }
@@ -61,12 +61,12 @@ async function loadRefCodes() {
             .split('\n')
             .map(code => code.trim())
             .filter(code => code.length > 0);
-        
+
         if (codes.length === 0) {
             console.log(chalk.red('[!] No referral codes found in refcode.txt'));
             return [];
         }
-        
+
         console.log(chalk.green(`[+] Loaded ${codes.length} referral codes from refcode.txt`));
         return codes;
     } catch (error) {
@@ -93,14 +93,14 @@ async function getRandomProxy() {
         await checkIP();
         return true;
     }
-    
+
     let proxyAttempt = 0;
     while (proxyAttempt < proxyList.length) {
         const proxy = proxyList[Math.floor(Math.random() * proxyList.length)];
         try {
             const agent = getProxyAgent(proxy);
             if (!agent) continue;
-            
+
             axiosConfig.httpsAgent = agent;
             await checkIP();
             return true;
@@ -108,7 +108,7 @@ async function getRandomProxy() {
             proxyAttempt++;
         }
     }
-    
+
     console.log(chalk.red('[!] Using default IP'));
     axiosConfig = {};
     await checkIP();
@@ -119,9 +119,9 @@ async function getDomains() {
     let attempt = 0;
     while (attempt < maxRetries) {
         try {
-            const key = String.fromCharCode(97 + Math.floor(Math.random() * 26)) + 
-                       String.fromCharCode(97 + Math.floor(Math.random() * 26));
-            
+            const key = String.fromCharCode(97 + Math.floor(Math.random() * 26)) +
+                String.fromCharCode(97 + Math.floor(Math.random() * 26));
+
             console.log(chalk.cyan(`[*] Fetching domains with key: ${key}`));
             const response = await axios.get(`https://generator.email/search.php?key=${key}`, axiosConfig);
             if (response.data && Array.isArray(response.data) && response.data.length > 0) {
@@ -149,8 +149,8 @@ function randomEmail(domain) {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
 
-    const cleanFirstName = firstName.replace(/[^a-zA-Z]/g, ''); 
-    const cleanLastName = lastName.replace(/[^a-zA-Z]/g, '');   
+    const cleanFirstName = firstName.replace(/[^a-zA-Z]/g, '');
+    const cleanLastName = lastName.replace(/[^a-zA-Z]/g, '');
 
     const randomNum = Math.floor(Math.random() * 900) + 100;
     const emailName = `${cleanFirstName.toLowerCase()}${cleanLastName.toLowerCase()}${randomNum}`;
@@ -161,12 +161,12 @@ function randomEmail(domain) {
     };
 }
 
-async function register(email, password) {
+async function register(email, password, username) {
     let attempt = 0;
     while (attempt < maxRetries) {
         try {
             console.log(chalk.cyan(`[*] Processing registration for ${email}...`));
-            
+
             if (!email || typeof email !== 'string') {
                 throw new Error('Email must be a string');
             }
@@ -176,12 +176,12 @@ async function register(email, password) {
             }
 
             const encodedPassword = encodeBase64(password);
-            
+
             const data = {
-                password: encodedPassword, 
-                rePassword: encodedPassword, 
-                username: "NEW_USER_NAME_02", 
-                email: email 
+                password: encodedPassword,
+                rePassword: encodedPassword,
+                username: username,
+                email: email
             };
 
             const response = await axios.post('https://gw.sosovalue.com/usercenter/email/anno/sendRegisterVerifyCode/V2', data, axiosConfig);
@@ -202,7 +202,7 @@ async function register(email, password) {
     }
 }
 
-async function verifEmail(email, password, verifyCode, invitationCode) {
+async function verifEmail(email, password, verifyCode, invitationCode, username) {
     let attempt = 0;
     while (attempt < maxRetries) {
         try {
@@ -211,8 +211,8 @@ async function verifEmail(email, password, verifyCode, invitationCode) {
             const encodedPassword = encodeBase64(password);
             const data = {
                 password: encodedPassword,
-                rePassword: encodedPassword, 
-                username: "NEW_USER_NAME_02", 
+                rePassword: encodedPassword,
+                username: username,
                 email: email,
                 verifyCode: verifyCode,
                 invitationCode: invitationCode,
@@ -220,7 +220,7 @@ async function verifEmail(email, password, verifyCode, invitationCode) {
             };
 
             const response = await axios.post('https://gw.sosovalue.com/usercenter/user/anno/v3/register', data, axiosConfig);
-            if(response.data.code === 0){
+            if (response.data.code === 0) {
                 console.log(chalk.green(`[+] Account created successfully with referral code: ${invitationCode}`));
                 return response.data;
             }
@@ -246,7 +246,7 @@ async function getOTP(email, domain, index = 0) {
         while (attempt < maxRetries) {
             try {
                 console.log(chalk.cyan(`[*] Checking inbox ${inboxNum}...`));
-                
+
                 const response = await axios.get(`https://generator.email/inbox${inboxNum}/`, {
                     ...axiosConfig,
                     headers: {
@@ -271,7 +271,7 @@ async function getOTP(email, domain, index = 0) {
                 const $ = cheerio.load(response.data);
                 const containerElements = $('.e7m.container.to1').eq(2).html();
                 const regex = /SoSoValue\s*-\s*(\d+)/;
-                
+
                 if (containerElements) {
                     const match = containerElements.match(regex);
                     if (match) {
@@ -309,10 +309,10 @@ async function getOTPLogin(email) {
 
     try {
         const response = await axios.post('https://gw.sosovalue.com/usercenter/email/anno/sendNewDeviceVerifyCode', data, axiosConfig);
-        if(response.data.code === 0){
-            console.log(chalk.cyan(`[*] OTP code sent successfully`)); 
+        if (response.data.code === 0) {
+            console.log(chalk.cyan(`[*] OTP code sent successfully`));
         }
-        return response.data; 
+        return response.data;
     } catch (error) {
         console.error(chalk.red(`[!] Error: ${error.response ? error.response.data : error.message}`));
         throw error;
@@ -329,7 +329,7 @@ async function verifLogin(email, password, verifyCode) {
     if (!verifyCode || typeof verifyCode !== 'string') {
         throw new Error('VerifyCode must be a string');
     }
-    
+
     const encodedPassword = encodeBase64(password);
 
     const data = {
@@ -342,10 +342,10 @@ async function verifLogin(email, password, verifyCode) {
 
     try {
         const response = await axios.post('https://gw.sosovalue.com/authentication/auth/v2/emailPasswordLogin', data, axiosConfig);
-        if(response.data.code === 0){
-            console.log(chalk.green(`[+] Login successful, wallet address: ${response.data.data.walletAddress}`)); 
+        if (response.data.code === 0) {
+            console.log(chalk.green(`[+] Login successful, wallet address: ${response.data.data.walletAddress}`));
         }
-        return response.data; 
+        return response.data;
     } catch (error) {
         console.error(chalk.red(`[!] Error: ${error.response ? error.response.data : error.message}`));
         throw error;
@@ -384,6 +384,8 @@ async function processRegistration(accountIndex, totalAccounts, invite, password
             }
 
             const domains = await getDomains();
+            const username = faker.internet.userName();
+
             if (domains.length === 0) {
                 throw new Error('Failed to fetch domains');
             }
@@ -392,7 +394,7 @@ async function processRegistration(accountIndex, totalAccounts, invite, password
             const selectedDomain = domains[Math.floor(Math.random() * domains.length)];
             const randEmail = randomEmail(selectedDomain);
 
-            const regis = await register(randEmail.email, password);
+            const regis = await register(randEmail.email, password, username);
             if (regis.code !== 0) {
                 console.log(chalk.red(`[!] Email ${randEmail.email} is already in use`));
                 continue;
@@ -403,10 +405,10 @@ async function processRegistration(accountIndex, totalAccounts, invite, password
                 throw new Error('Failed to get registration OTP');
             }
 
-            await verifEmail(randEmail.email, password, otp, invite);
-            
+            await verifEmail(randEmail.email, password, otp, invite, username);
+
             console.log(chalk.green(`[+] Account created successfully: ${randEmail.email}`));
-            
+
             console.log(chalk.cyan(`[*] Attempting login for account: ${randEmail.email}`));
             const regLogin = await getOTPLogin(randEmail.email);
             if (regLogin.code !== 0) {
@@ -438,7 +440,7 @@ async function processRegistration(accountIndex, totalAccounts, invite, password
             console.log(chalk.cyan(`    → Is Robot: ${login.data.data.isRobot}`));
             console.log(chalk.cyan(`    → Is Suspicious: ${login.data.data.isSuspicious}`));
             console.log(chalk.cyan(`    → Wallet Address: ${verifLogins.data.walletAddress}\n`));
-            
+
             success = true;
 
         } catch (error) {
@@ -472,7 +474,7 @@ async function processSingleMode(invite, password, accountCount) {
 async function processMultiMode(refCodes, password, accountsPerCode) {
     let totalSuccessful = 0;
     let totalFailed = 0;
-    
+
     for (let i = 0; i < refCodes.length; i++) {
         const invite = refCodes[i];
         console.log(chalk.yellow(`\n===============================================`));
