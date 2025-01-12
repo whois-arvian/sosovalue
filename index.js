@@ -183,8 +183,14 @@ async function register(email, password, username) {
                 username: username,
                 email: email
             };
+            const url = new URL('https://gw.sosovalue.com/usercenter/email/anno/sendRegisterVerifyCode/V2');
+            const params = new URLSearchParams({
+                'cf-turnstile-response': '0.kpVRXAnMTMSC_ujuB85kZRu2hVyCV8d1ZCDdPPxRSeseNKmU5qPsuA2Axa6WrUy0Wu5xfpGUhQ94hAapIT0T9e8dBQnpjpOIyGsNYvwQL4iFfR-_RgCclTrq8BVHu9VLJUNwu9JGbyK3yl_IXWF0oc9ksLN7mLatTbZJCTowFJ9mEExqUZVXEuM2DyhsI7ti-qcDrkPSRRmZgD6YL68gInKt0q9_scZEMg1HVCjigJtetvZUiIvj48NakuqMvqncv2IryVbnfTgGtDj0CyXrz9yDLTFoWi6bKOkdjQExS-_0IbAve-UMnLPXQXNZXL90TKIqkpWxRXGXPmN5O44He2nthZ9Qy17W8FGIxlpa59DwzwPe7D5sV_g3nm3g9Lf6DItC8Oe1q8KoTq4zE5HKGbDJUoP1riXRKAc-jzdfLlecyC2W1tSpClXuEP2TDZEyz3ru0qPmhIbrY6UsDlmvZ8YDijj5GKomyCb9Lg3n4Br40U49hKZUG2Tvw-fTXAUfEM0maFzqVVgQLIZmrN7udze1Uy0m2PzmzLqWlev-jWxLXc3pwaIe5oAOKgPqbNGI-fl1mezBNw6lIRNeiDGawJhqI4tho9apVB_H1C65CgiTTUJF8zLpJ6l8WigHeWJhwgX3hYfYdeBRlzFblH__7xZjmugscR0sgUPOqSa_SWPB6lu-NDJnD1g8Rj6kI010QBLCqTvSqOCuXZr4wK9VSxd80UO7U5KUam1-DEwQ_UB6xknKkGIm57pI7sARVGLWzvplOc7t3km8oeX09WuZdg.cKvcJH7ch7kaKv-o34tMog.e69f84d578aeed143243292b220855f9d5c1785b69b61963218f47fb3f1d691e'
+            });
 
-            const response = await axios.post('https://gw.sosovalue.com/usercenter/email/anno/sendRegisterVerifyCode/V2', data, axiosConfig);
+            url.search = params.toString();
+            const response = await axios.post(url.toString(), data, axiosConfig);
+            // const response = await axios.post('https://gw.sosovalue.com/usercenter/email/anno/sendRegisterVerifyCode/V2', data, axiosConfig);
             console.log(chalk.green(`[+] Registration successful for ${email}`));
             console.log(chalk.green(`[+] Registration successful for ${JSON.stringify(response.data)}`));
             console.log(chalk.green(`[+] Registration successful for ${response.code}`));
